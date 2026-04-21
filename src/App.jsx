@@ -550,10 +550,10 @@ export default function App() {
 실무에서 바로 쓸 수 있도록 구체적으로 작성해주세요.`;
     try {
       const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-      const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4000,messages:[{role:"user",content:prompt}]})});
+      const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
       const d = await r.json();
       if(d.content?.[0]?.text){ setAiPlan(d.content[0].text); setPage("result"); setResultTab("plan"); }
-    } catch(e){ alert("오류: "+e.message); }
+    } catch(e){ alert("오류가 발생했습니다.\n\n원인: " + e.message + "\n\nAPI 키가 Vercel 환경변수에 올바르게 등록됐는지 확인해주세요.\n(VITE_ANTHROPIC_API_KEY)"); }
     finally{ setLoading(false); }
   };
 
@@ -675,7 +675,7 @@ export default function App() {
 
         {step===3 && <>
           <h3 style={S.cardT}>📍 장소 & 연락처</h3>
-          <FL>장소 유형 * <span style={{fontWeight:400,color:"#10b981",fontSize:"0.75rem"}}>(복수 선택 가능)</span></FL>
+          <FL>장소 유형 <span style={{fontWeight:400,color:"#10b981",fontSize:"0.75rem"}}>(복수 선택 가능 · 선택사항)</span></FL>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0.4rem",marginBottom:"0.8rem"}}>
             {["야외 공원·광장","야외 도심·거리","실내 공연장","실내 컨벤션·전시장","실내 체육관","캠퍼스·학교","복합 공간 (실내+야외)","기타"].map(opt=>{
               const on = form.locationTypes.includes(opt);
@@ -687,7 +687,7 @@ export default function App() {
               );
             })}
           </div>
-          <FL>행사 장소명 *</FL>
+          <FL>행사 장소명 * <span style={{fontWeight:400,color:"#e94560",fontSize:"0.75rem"}}>(필수 — 입력하면 버튼 활성화)</span></FL>
           <FI placeholder="예: 두류공원, 엑스코, 계명대학교..." value={form.locationDetail} onChange={e=>up("locationDetail",e.target.value)}/>
 
           {form.locationTypes.length > 0 && (
@@ -704,8 +704,8 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:"0.5rem",marginTop:"0.8rem"}}>
             <SB onClick={()=>setStep(2)}>← 이전</SB>
-            <button disabled={!form.locationDetail||form.locationTypes.length===0||loading} onClick={generate}
-              style={{...S.pb,flex:1,...(!form.locationDetail||form.locationTypes.length===0||loading?S.pbOff:{}),display:"flex",alignItems:"center",justifyContent:"center",gap:"0.4rem"}}>
+            <button disabled={!form.locationDetail||loading} onClick={generate}
+              style={{...S.pb,flex:1,...(!form.locationDetail||loading?S.pbOff:{}),display:"flex",alignItems:"center",justifyContent:"center",gap:"0.4rem"}}>
               {loading?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⚙️</span>AI 생성 중...</>:"✨ AI 기획서 + 전체 견적 생성!"}
             </button>
           </div>
