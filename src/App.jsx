@@ -549,11 +549,18 @@ export default function App() {
 
 실무에서 바로 쓸 수 있도록 구체적으로 작성해주세요.`;
     try {
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-      const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+      const r = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
       const d = await r.json();
-      if(d.content?.[0]?.text){ setAiPlan(d.content[0].text); setPage("result"); setResultTab("plan"); }
-    } catch(e){ alert("오류가 발생했습니다.\n\n원인: " + e.message + "\n\nAPI 키가 Vercel 환경변수에 올바르게 등록됐는지 확인해주세요.\n(VITE_ANTHROPIC_API_KEY)"); }
+      if (!r.ok) throw new Error(d.error || "서버 오류");
+      if (d.text) { setAiPlan(d.text); setPage("result"); setResultTab("plan"); }
+      else throw new Error("응답 내용이 비어있습니다.");
+    } catch(e){
+      alert("❌ 오류\n\n" + e.message + "\n\n💡 Vercel 환경변수 확인:\n이름: ANTHROPIC_API_KEY\n값: sk-ant-...");
+    }
     finally{ setLoading(false); }
   };
 
